@@ -1,11 +1,22 @@
 'use strict';
 
-const video = document.getElementById('video');
-const canvas = document.getElementById('canvas');
-const canvasGetImage = document.getElementById('canvas-get-image');
-const canvasFrame = document.getElementById('canvas-frame');
-const canvasCH001 = document.getElementById('canvas-ch001');
-const canvasCH002 = document.getElementById('canvas-ch002');
+const htmlEls = {
+  video : document.getElementById('video'),
+  canvas : document.getElementById('canvas'),
+  canvasGetImage : document.getElementById('canvas-get-image'),
+  canvasFrame : document.getElementById('canvas-frame'),
+  canvasCH001 : document.getElementById('canvas-ch001'),
+  canvasCH002 : document.getElementById('canvas-ch002')
+}
+
+
+let settings = {
+  width: 640,
+  height: 480,
+  fps: 300
+}
+
+
 // const snap = document.getElementById("snap");
 const errorMsgElement = document.querySelector('span#errorMsg');
 let imgObj = {
@@ -17,7 +28,7 @@ let imgArray = [];
 const constraints = {
   audio: false,
   video: {
-    width: 640, height: 480
+    width: settings.width, height: settings.height
   }
 };
 
@@ -56,7 +67,7 @@ var gif = new GIF({
 
 let generateGif = function(imgs){
   // add an image element
-  var ctxGetImage= canvasGetImage.getContext('2d');
+  var ctxGetImage= htmlEls.canvasGetImage.getContext('2d');
   for(var i = 0; i < imgs.length; i++ ){
     
     var image = new Image();
@@ -68,7 +79,7 @@ let generateGif = function(imgs){
       image.src = imgs[i];
       // console.log(ctxGetImage);
       
-      gif.addFrame(image);
+      gif.addFrame(image, {delay: settings.fps + 100});
     }
     
   }
@@ -80,19 +91,28 @@ let generateGif = function(imgs){
   gif.render();
 }
 
-var cGrabFrame = canvasFrame.getContext('2d');
+let cGrabFrame = htmlEls.canvasFrame.getContext('2d');
 document.addEventListener('keydown', (event) => {
   const keyName = event.code;
-  console.log(keyName);
   
   // grab image "Space"
   if(keyName == "Space"){
-    cGrabFrame.drawImage(video, 0, 0, 640, 480)
-    imgArray.push(canvasFrame.toDataURL('image/jpeg').replace("image/jpeg", "image/octet-stream"));
+    cGrabFrame.drawImage(video, 0, 0, settings.width, settings.height)
+    imgArray.push(htmlEls.canvasFrame.toDataURL('image/jpeg').replace("image/jpeg", "image/octet-stream"));
   }
+  //  clear images "e"
+  if(keyName == "KeyE"){
+    imgArray.length = 0;
+  }
+  
+  //  clear images "f"
+  if(keyName == "KeyF"){
+    htmlEls.canvas.closest('.wrapper').classList.toggle('fullscreen');
+  }
+  
   //  clear images "c"
   if(keyName == "KeyC"){
-    imgArray = [];
+    imgArray.splice(-1,1);
   }
 
   // Onion skin "o"
@@ -107,22 +127,34 @@ document.addEventListener('keydown', (event) => {
 
 });
 
-var canvasPlay = canvas.getContext('2d');
+var canvasPlay = htmlEls.canvas.getContext('2d');
 //var image = canvas.toDataURL("image/png").replace("image/png", "image/octet-stream");  // here is the most important part because if you dont replace you will get a DOM 18 exception.
 
 
 var index = 0; 
 setInterval(function(){ 
+  
   if(imgArray.length > 0){
+
+    canvasPlay.clearRect(0, 0, canvasPlay.width, canvasPlay.height);
     index == imgArray.length ? index = 0 : index++
     var image = new Image();
     image.onload = function() {
+      canvasPlay.clearRect(0, 0, canvasPlay.width, canvasPlay.height);
       canvasPlay.drawImage(image, 0, 0);
     };
     if(imgArray[index] != undefined){
       image.src = imgArray[index];
     }
-  }
- }, 300);
+  } else {
+    canvasPlay.clearRect(0, 0, canvasPlay.width, canvasPlay.height);
+    var image = new Image();
+    image.onload = function() {
+      canvasPlay.clearRect(0, 0, canvasPlay.width, canvasPlay.height);
+      canvasPlay.drawImage(image, 0, 0);
+    };
+      image.src = "/img/no-image-available.jpg";
+  } 
+ }, settings.fps);
 
 

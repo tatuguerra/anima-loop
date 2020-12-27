@@ -1,3 +1,17 @@
 .wrapper {position: relative;}
 video{opacity: .5;}
 canvas{top: 0; position: absolute; z-index: -1;}
+.fullscreen .video-wrap,
+.fullscreen #video,
+.fullscreen #canvas{
+    position: fixed;
+    z-index: 999;
+    top: 50%;
+    left: 50%;
+    width: 100vw;
+    height: auto;
+    transform: translate(-50%, -50%);
+}
+.fullscreen #canvas{
+        z-index: 99;
+}
